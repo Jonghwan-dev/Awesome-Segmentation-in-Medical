@@ -128,7 +128,7 @@ class up_conv(nn.Module):
 
 
 class CMUNet(nn.Module):
-    def __init__(self, img_ch=3, output_ch=1, l=7, k=7):
+    def __init__(self, in_channels=3, out_channels=1, l=7, k=7):
         """
         Args:
             img_ch : input channel.
@@ -141,7 +141,7 @@ class CMUNet(nn.Module):
 
         # Encoder
         self.Maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.Conv1 = conv_block(ch_in=img_ch, ch_out=64)
+        self.Conv1 = conv_block(ch_in=in_channels, ch_out=64)
         self.Conv2 = conv_block(ch_in=64, ch_out=128)
         self.Conv3 = conv_block(ch_in=128, ch_out=256)
         self.Conv4 = conv_block(ch_in=256, ch_out=512)
@@ -156,7 +156,7 @@ class CMUNet(nn.Module):
         self.Up_conv3 = conv_block(ch_in=128 * 2, ch_out=128)
         self.Up2 = up_conv(ch_in=128, ch_out=64)
         self.Up_conv2 = conv_block(ch_in=64 * 2, ch_out=64)
-        self.Conv_1x1 = nn.Conv2d(64, output_ch, kernel_size=1, stride=1, padding=0)
+        self.Conv_1x1 = nn.Conv2d(64, out_channels, kernel_size=1, stride=1, padding=0)
         # Skip-connection
         self.msag4 = MSAG(512)
         self.msag3 = MSAG(256)
@@ -203,7 +203,7 @@ class CMUNet(nn.Module):
         return d1
 
 class CMUNetv2_CM(nn.Module):
-    def __init__(self, img_ch=3, output_ch=1, dims=[16, 32, 128, 160, 256], depths=[1, 1, 1, 1, 1], k=[3,3,5,7,7]):
+    def __init__(self, in_channels=3, out_channels=1, dims=[16, 32, 128, 160, 256], depths=[1, 1, 1, 1, 1], k=[3,3,5,7,7]):
         """
         Args:
             img_ch : input channel.
@@ -217,7 +217,7 @@ class CMUNetv2_CM(nn.Module):
         print("===============================")
         # Encoder
         self.Maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.stem = conv_block(ch_in=img_ch, ch_out=dims[0])
+        self.stem = conv_block(ch_in=in_channels, ch_out=dims[0])
         self.encoder1 = ConvMixerBlock1(ch_in=dims[0], ch_out=dims[0], depth=depths[0], k=k[0])
         self.encoder2 = ConvMixerBlock1(ch_in=dims[0], ch_out=dims[1], depth=depths[1], k=k[1])
         self.encoder3 = ConvMixerBlock1(ch_in=dims[1], ch_out=dims[2], depth=depths[2], k=k[2])
@@ -232,7 +232,7 @@ class CMUNetv2_CM(nn.Module):
         self.Up_conv3 = conv_block(ch_in=dims[1] * 2, ch_out=dims[1])
         self.Up2 = up_conv(ch_in=dims[1], ch_out=dims[0])
         self.Up_conv2 = conv_block(ch_in=dims[0] * 2, ch_out=dims[0])
-        self.Conv_1x1 = nn.Conv2d(dims[0], output_ch, kernel_size=1, stride=1, padding=0)
+        self.Conv_1x1 = nn.Conv2d(dims[0], out_channels, kernel_size=1, stride=1, padding=0)
 
 
     def forward(self, x):

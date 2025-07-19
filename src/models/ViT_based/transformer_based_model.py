@@ -3,44 +3,25 @@ from .swinUnet.vision_transformer import SwinUnet
 from .swinUnet.config import get_config
 from .medicalT.axialnet import MedT
 
-
-def get_transformer_based_model(parser, model_name: str, img_size: int, num_classes: int, in_ch: int):
+def get_transformer_based_model(model_name: str, config, num_classes: int):
+    """
+    Creates a transformer-based model instance based on a config object.
+    The config object is the result of argparse from train.py.
+    """
     if model_name == "MedT":
-        model = MedT(img_size=img_size, imgchan=in_ch, num_classes=num_classes)
+        # MedT expects img_size and in_ch from config
+        model = MedT(img_size=config.target_size, imgchan=1, num_classes=num_classes)
+    
     elif model_name == "SwinUnet":
-        parser.add_argument('--zip', action='store_true',
-                            help='use zipped dataset instead of folder dataset')
-        parser.add_argument(
-            '--cfg', type=str, default="./src/network/transfomer_based/swinUnet/swin_tiny_patch4_window7_224_lite.yaml",
-            help='path to config file', )
-        parser.add_argument(
-            "--opts",
-            help="Modify config options by adding 'KEY VALUE' pairs. ",
-            default=None,
-            nargs='+',
-        )
-        parser.add_argument('--cache-mode', type=str, default='part', choices=['no', 'full', 'part'],
-                            help='no: no cache, '
-                                 'full: cache all data, '
-                                 'part: sharding the dataset into nonoverlapping pieces and only cache one piece')
-        parser.add_argument('--resume', help='resume from checkpoint')
-        parser.add_argument('--accumulation-steps', type=int,
-                            help="gradient accumulation steps")
-        parser.add_argument('--use-checkpoint', action='store_true',
-                            help="whether to use gradient checkpointing to save memory")
-        parser.add_argument('--amp-opt-level', type=str, default='O1', choices=['O0', 'O1', 'O2'],
-                            help='mixed precision opt level, if O0, no amp is used')
-        parser.add_argument('--tag', help='tag of experiment')
-        parser.add_argument('--eval', action='store_true',
-                            help='Perform evaluation only')
-        parser.add_argument('--throughput', action='store_true',
-                            help='Test throughput only')
-        config = get_config(parser.parse_args())
-        model = SwinUnet(config, img_size=224, num_classes=num_classes)
+        # get_config now uses the pre-parsed 'config' object
+        swin_config = get_config(config)
+        model = SwinUnet(config=swin_config, img_size=config.target_size, num_classes=num_classes)
+        
     elif model_name == "TransUnet":
-        model = TransUnet(img_ch=in_ch, output_ch=num_classes)
+        # TransUnet expects img_ch and output_ch
+        model = TransUnet(img_ch=1, output_ch=num_classes)
+        
     else:
-        model = None
-        print("model err")
-        exit(0)
+        raise ValueError(f"Transformer model '{model_name}' not recognized.")
+        
     return model

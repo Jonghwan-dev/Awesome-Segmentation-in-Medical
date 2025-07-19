@@ -66,14 +66,14 @@ class BasicConv2d(nn.Module):
         return x
 
 
-class ResNet34UnetPlus(nn.Module):
+class UNetplus(nn.Module):
     def __init__(self,
-                 num_channels=3,
-                 num_class=1,
+                 in_channels=3, 
+                 out_channels=1,
                  is_deconv=False,
                  decoder_kernel_size=3,
                  ):
-        super().__init__()
+        super(UNetplus,self).__init__()
 
         filters = [64, 128, 256, 512]
         resnet = models.resnet34(pretrained=False)
@@ -84,10 +84,10 @@ class ResNet34UnetPlus(nn.Module):
         self.mix = nn.Parameter(torch.FloatTensor(5))
         self.mix.data.fill_(1)
 
-        if num_channels == 3:
+        if in_channels == 3:
             self.firstconv = resnet.conv1
         else:
-            self.firstconv = nn.Conv2d(num_channels, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+            self.firstconv = nn.Conv2d(in_channels, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
 
         self.firstbn = resnet.bn1
         self.firstrelu = resnet.relu
@@ -143,10 +143,10 @@ class ResNet34UnetPlus(nn.Module):
                                        kernel_size=decoder_kernel_size,
                                        is_deconv=is_deconv)
 
-        self.logit1 = nn.Conv2d(64, num_class, kernel_size=1)
-        self.logit2 = nn.Conv2d(64, num_class, kernel_size=1)
-        self.logit3 = nn.Conv2d(128, num_class, kernel_size=1)
-        self.logit4 = nn.Conv2d(256, num_class, kernel_size=1)
+        self.logit1 = nn.Conv2d(64, out_channels, kernel_size=1)
+        self.logit2 = nn.Conv2d(64, out_channels, kernel_size=1)
+        self.logit3 = nn.Conv2d(128, out_channels, kernel_size=1)
+        self.logit4 = nn.Conv2d(256, out_channels, kernel_size=1)
 
     def require_encoder_grad(self, requires_grad):
         blocks = [self.firstconv,

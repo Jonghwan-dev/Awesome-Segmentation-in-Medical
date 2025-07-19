@@ -69,6 +69,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb
 
 # pyenv
 .python-version
@@ -101,10 +102,15 @@ ENV/
 .mypy_cache/
 
 # input data, saved log, checkpoints
-data/
 input/
 saved/
 datasets/
+checkpoints/
+wandb/
+/logger
+*.csv
+*.ckpt
+*.pth
 
 # editor, os cache directory
 .vscode/

@@ -5,7 +5,7 @@ from .other.layer_b import unetConv2
 
 class UNet3plus(nn.Module):
     ''' UNet 3+ '''
-    def __init__(self, in_channels=3, n_classes=1, feature_scale=4, is_deconv=True, is_batchnorm=True):
+    def __init__(self, in_channels=3, out_channels=1, feature_scale=4, is_deconv=True, is_batchnorm=True):
         super(UNet3plus, self).__init__()
         self.is_deconv = is_deconv
         self.in_channels = in_channels
@@ -175,7 +175,7 @@ class UNet3plus(nn.Module):
         self.relu1d_1 = nn.ReLU(inplace=False)
 
         # output
-        self.outconv1 = nn.Conv2d(self.UpChannels, n_classes, 3, padding=1)
+        self.outconv1 = nn.Conv2d(self.UpChannels, out_channels, 3, padding=1)
 
         # initialise weights
 

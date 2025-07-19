@@ -1,110 +1,189 @@
+# trainer.py
+import os
 import numpy as np
 import torch
+import pandas as pd
+from tqdm import tqdm
+from pathlib import Path
+import wandb
 from torchvision.utils import make_grid
-from base import BaseTrainer
-from utils import inf_loop, MetricTracker
 
+# Assume these utils and metrics are in the correct path
+from src.utils.metrics import pixel_accuracy, dice_score, hd95_batch, iou_score
+from src.utils.util import MetricTracker
 
-class Trainer(BaseTrainer):
-    """
-    Trainer class
-    """
-    def __init__(self, model, criterion, metric_ftns, optimizer, config, device,
-                 data_loader, valid_data_loader=None, lr_scheduler=None, len_epoch=None):
-        super().__init__(model, criterion, metric_ftns, optimizer, config)
+class Trainer:
+    def __init__(self, model, criterion, metrics, optimizer, config, device,
+                 train_loader, val_loader=None, lr_scheduler=None):
+        
+        self.model = model
+        self.criterion = criterion
+        self.optimizer = optimizer
         self.config = config
         self.device = device
-        self.data_loader = data_loader
-        if len_epoch is None:
-            # epoch-based training
-            self.len_epoch = len(self.data_loader)
-        else:
-            # iteration-based training
-            self.data_loader = inf_loop(data_loader)
-            self.len_epoch = len_epoch
-        self.valid_data_loader = valid_data_loader
-        self.do_validation = self.valid_data_loader is not None
+        self.train_loader = train_loader
+        self.val_loader = val_loader
         self.lr_scheduler = lr_scheduler
-        self.log_step = int(np.sqrt(data_loader.batch_size))
+        self.metric_fns = metrics
+        
+        self.train_metrics = MetricTracker('loss', 'iou')
+        self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_fns])
 
-        self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+        self.start_epoch = 1
+        self.checkpoint_dir = Path(config.get('checkpoint_dir', 'checkpoints'))
+        self.checkpoint_dir.mkdir(exist_ok=True, parents=True)
+        self.checkpoint_name = config.get('checkpoint_name', 'best_model.pth')
+
+        self.early_stopping_patience = config.get('early_stopping_patience', 30)
+        self.early_stopping_counter = 0
+
+        # --- FIX: Simplified state for dynamic ranking ---
+        self.metric_history = [] # Store dicts of metrics for each epoch
+        self.best_epoch_info = {} # Store info of the best epoch
+
+        # --- Wandb specific setup ---
+        if self.val_loader:
+            self.fixed_val_batch = next(iter(self.val_loader))
+
+    def train(self):
+        """Full training logic with dynamic ranking and early stopping."""
+        for epoch in range(self.start_epoch, self.config['epochs'] + 1):
+            train_log = self._train_epoch(epoch)
+            
+            log_dict = {'epoch': epoch, **train_log}
+            
+            if self.val_loader:
+                val_log = self._valid_epoch(epoch)
+                log_dict.update({f'val_{k}': v for k, v in val_log.items()})
+                
+                self._log_validation_images(epoch)
+                
+                # --- FIX: Use the new dynamic ranking system ---
+                is_new_best = self._update_and_check_best(val_log, epoch)
+                
+                if is_new_best:
+                    self.early_stopping_counter = 0
+                    self._save_checkpoint()
+                else:
+                    self.early_stopping_counter += 1
+                
+                if self.early_stopping_counter >= self.early_stopping_patience:
+                    print(f"Validation performance did not improve for {self.early_stopping_patience} epochs. Early stopping.")
+                    print(f"Best model was from epoch {self.best_epoch_info.get('epoch', 'N/A')} with rank score {self.best_epoch_info.get('avg_rank', 'N/A'):.4f}")
+                    break
+            
+            if wandb.run: wandb.log(log_dict, step=epoch)
+            
+            formatted_log = {k: f"{v:.4f}" if isinstance(v, float) else v for k, v in log_dict.items()}
+            print(f"Epoch {epoch} Summary: {formatted_log}")
+
+    def _update_and_check_best(self, val_log, current_epoch):
+        """
+        Appends current metrics to history, re-calculates ranks for all epochs,
+        and determines if the current epoch is the new best.
+        """
+        # 1. Add current epoch's metrics to history
+        current_metrics = {'epoch': current_epoch, **val_log}
+        self.metric_history.append(current_metrics)
+        
+        # 2. Create a DataFrame from the entire history
+        history_df = pd.DataFrame(self.metric_history)
+        
+        # 3. Calculate ranks for each metric. Lower rank is better.
+        history_df['loss_rank'] = history_df['loss'].rank(ascending=True, method='dense')
+        history_df['hd95_rank'] = history_df['hd95_batch'].rank(ascending=True, method='dense')
+        history_df['iou_rank'] = history_df['iou_score'].rank(ascending=False, method='dense')
+        history_df['dice_rank'] = history_df['dice_score'].rank(ascending=False, method='dense')
+        
+        # 4. Calculate the average rank score for each epoch
+        rank_cols = ['loss_rank', 'hd95_rank', 'iou_rank', 'dice_rank']
+        history_df['avg_rank'] = history_df[rank_cols].mean(axis=1)
+        
+        # 5. Find the epoch with the best (minimum) average rank
+        best_epoch_idx = history_df['avg_rank'].idxmin()
+        self.best_epoch_info = history_df.loc[best_epoch_idx].to_dict()
+        
+        # 6. Check if the current epoch is the new best epoch
+        if self.best_epoch_info['epoch'] == current_epoch:
+            print(f"New best model found at epoch {current_epoch}!")
+            print(f"  - Avg Rank: {self.best_epoch_info['avg_rank']:.4f}")
+            print(f"  - Metrics: Loss={val_log['loss']:.4f}, HD95={val_log['hd95_batch']:.4f}, IoU={val_log['iou_score']:.4f}, Dice={val_log['dice_score']:.4f}")
+            return True
+        return False
 
     def _train_epoch(self, epoch):
-        """
-        Training logic for an epoch
-
-        :param epoch: Integer, current training epoch.
-        :return: A log that contains average loss and metric in this epoch.
-        """
         self.model.train()
         self.train_metrics.reset()
-        for batch_idx, (data, target) in enumerate(self.data_loader):
-            data, target = data.to(self.device), target.to(self.device)
-
+        progress_bar = tqdm(self.train_loader, desc=f"Train Epoch {epoch}")
+        for batch_idx, sampled_batch in enumerate(progress_bar):
+            image, target = sampled_batch['image'].to(self.device), sampled_batch['mask'].to(self.device)
+            
             self.optimizer.zero_grad()
-            output = self.model(data)
-            loss = self.criterion(output, target)
+            output = self.model(image)
+            loss = self.criterion(output, target.float())
             loss.backward()
             self.optimizer.step()
-
-            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
-            for met in self.metric_ftns:
-                self.train_metrics.update(met.__name__, met(output, target))
-
-            if batch_idx % self.log_step == 0:
-                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(
-                    epoch,
-                    self._progress(batch_idx),
-                    loss.item()))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
-
-            if batch_idx == self.len_epoch:
-                break
-        log = self.train_metrics.result()
-
-        if self.do_validation:
-            val_log = self._valid_epoch(epoch)
-            log.update(**{'val_'+k : v for k, v in val_log.items()})
-
-        if self.lr_scheduler is not None:
-            self.lr_scheduler.step()
-        return log
+            with torch.no_grad():
+                pred_sigmoid = torch.sigmoid(output.detach())
+                self.train_metrics.update('iou', iou_score(pred_sigmoid, target))
+            progress_bar.set_postfix(loss=loss.item(), iou=self.train_metrics.avg('iou'))
+        if self.lr_scheduler: self.lr_scheduler.step()
+        return self.train_metrics.result()
 
     def _valid_epoch(self, epoch):
-        """
-        Validate after training an epoch
-
-        :param epoch: Integer, current training epoch.
-        :return: A log that contains information about validation
-        """
         self.model.eval()
         self.valid_metrics.reset()
+        progress_bar = tqdm(self.val_loader, desc=f"Valid Epoch {epoch}")
         with torch.no_grad():
-            for batch_idx, (data, target) in enumerate(self.valid_data_loader):
-                data, target = data.to(self.device), target.to(self.device)
-
-                output = self.model(data)
-                loss = self.criterion(output, target)
-
-                self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
+            for batch_idx, sampled_batch in enumerate(progress_bar):
+                image, target = sampled_batch['image'].to(self.device), sampled_batch['mask'].to(self.device)
+                
+                output = self.model(image)
+                loss = self.criterion(output, target.float())
+                pred_sigmoid = torch.sigmoid(output)
                 self.valid_metrics.update('loss', loss.item())
-                for met in self.metric_ftns:
-                    self.valid_metrics.update(met.__name__, met(output, target))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
-
-        # add histogram of model parameters to the tensorboard
-        for name, p in self.model.named_parameters():
-            self.writer.add_histogram(name, p, bins='auto')
+                for met in self.metric_fns:
+                    metric_value = met(pred_sigmoid, target)
+                    self.valid_metrics.update(met.__name__, metric_value)
         return self.valid_metrics.result()
 
-    def _progress(self, batch_idx):
-        base = '[{}/{} ({:.0f}%)]'
-        if hasattr(self.data_loader, 'n_samples'):
-            current = batch_idx * self.data_loader.batch_size
-            total = self.data_loader.n_samples
-        else:
-            current = batch_idx
-            total = self.len_epoch
-        return base.format(current, total, 100.0 * current / total)
+    def _save_checkpoint(self):
+        """Saves model checkpoint locally and logs it as a wandb artifact."""
+        state = {
+            'arch': type(self.model).__name__,
+            'state_dict': self.model.state_dict(),
+            'best_epoch_info': self.best_epoch_info,
+            'config': self.config
+        }
+        filename = str(self.checkpoint_dir / self.checkpoint_name)
+        torch.save(state, filename)
+        
+        if wandb.run:
+            artifact = wandb.Artifact(name=f"{wandb.run.name}-best-model", type="model")
+            artifact.add_file(filename)
+            wandb.log_artifact(artifact, aliases=["best"])
+            print(f"Checkpoint saved to {filename} and logged to wandb.")
+
+    def _log_validation_images(self, epoch):
+        """Logs a fixed batch of validation images, masks, and predictions to wandb."""
+        if not wandb.run: return
+        self.model.eval()
+        images = self.fixed_val_batch['image'].to(self.device)
+        gt_masks = self.fixed_val_batch['mask'].to(self.device)
+        
+        with torch.no_grad():
+            pred_logits = self.model(images)
+            pred_masks = torch.sigmoid(pred_logits)
+
+        images_grid = make_grid(images, normalize=True)
+        gt_masks_grid = make_grid(gt_masks, normalize=True)
+        pred_masks_grid = make_grid(pred_masks, normalize=True)
+
+        wandb.log({
+            "validation_samples": [
+                wandb.Image(images_grid, caption="Input Images"),
+                wandb.Image(gt_masks_grid, caption="Ground Truth Masks"),
+                wandb.Image(pred_masks_grid, caption=f"Predicted Masks (Epoch {epoch})")
+            ]
+        }, step=epoch)

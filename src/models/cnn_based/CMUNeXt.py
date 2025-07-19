@@ -88,7 +88,7 @@ class fusion_conv(nn.Module):
 
 
 class CMUNeXt(nn.Module):
-    def __init__(self, input_channel=3, num_classes=1, dims=[16, 32, 128, 160, 256], depths=[1, 1, 1, 3, 1], kernels=[3, 3, 7, 7, 7]):
+    def __init__(self, in_channels=3, out_channels=1, dims=[16, 32, 128, 160, 256], depths=[1, 1, 1, 3, 1], kernels=[3, 3, 7, 7, 7]):
         """
         Args:
             input_channel : input channel.
@@ -100,7 +100,7 @@ class CMUNeXt(nn.Module):
         super(CMUNeXt, self).__init__()
         # Encoder
         self.Maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.stem = conv_block(ch_in=input_channel, ch_out=dims[0])
+        self.stem = conv_block(ch_in=in_channels, ch_out=dims[0])
         self.encoder1 = CMUNeXtBlock(ch_in=dims[0], ch_out=dims[0], depth=depths[0], k=kernels[0])
         self.encoder2 = CMUNeXtBlock(ch_in=dims[0], ch_out=dims[1], depth=depths[1], k=kernels[1])
         self.encoder3 = CMUNeXtBlock(ch_in=dims[1], ch_out=dims[2], depth=depths[2], k=kernels[2])
@@ -115,7 +115,7 @@ class CMUNeXt(nn.Module):
         self.Up_conv3 = fusion_conv(ch_in=dims[1] * 2, ch_out=dims[1])
         self.Up2 = up_conv(ch_in=dims[1], ch_out=dims[0])
         self.Up_conv2 = fusion_conv(ch_in=dims[0] * 2, ch_out=dims[0])
-        self.Conv_1x1 = nn.Conv2d(dims[0], num_classes, kernel_size=1, stride=1, padding=0)
+        self.Conv_1x1 = nn.Conv2d(dims[0], out_channels, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
         x1 = self.stem(x)
@@ -150,12 +150,12 @@ class CMUNeXt(nn.Module):
 
 
 def cmunext(input_channel=3, num_classes=1, dims=[16, 32, 128, 160, 256], depths=[1, 1, 1, 3, 1], kernels=[3, 3, 7, 7, 7]):
-    return CMUNeXt(dims=dims, depths=depths, kernels=kernels, input_channel=3, num_classes=1)
+    return CMUNeXt(dims=dims, depths=depths, kernels=kernels, in_channels=3, out_channels=1)
 
 
 def cmunext_s(input_channel=3, num_classes=1, dims=[8, 16, 32, 64, 128], depths=[1, 1, 1, 1, 1], kernels=[3, 3, 7, 7, 9]):
-    return CMUNeXt(dims=dims, depths=depths, kernels=kernels, input_channel=3, num_classes=1)
+    return CMUNeXt(dims=dims, depths=depths, kernels=kernels, in_channels=3, out_channels=1)
 
 
 def cmunext_l(input_channel=3, num_classes=1, dims=[32, 64, 128, 256, 512], depths=[1, 1, 1, 6, 3], kernels=[3, 3, 7, 7, 7]):
-    return CMUNeXt(dims=dims, depths=depths, kernels=kernels, input_channel=3, num_classes=1)
+    return CMUNeXt(dims=dims, depths=depths, kernels=kernels, in_channels=3, out_channels=1)

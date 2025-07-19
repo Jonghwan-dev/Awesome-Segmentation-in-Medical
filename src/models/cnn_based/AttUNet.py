@@ -64,13 +64,13 @@ class Attention_block(nn.Module):
         return x * psi
 
 
-class AttU_Net(nn.Module):
-    def __init__(self, img_ch=3, output_ch=1):
-        super(AttU_Net, self).__init__()
+class AttUNet(nn.Module):
+    def __init__(self, in_channels=3, out_channels=1):
+        super(AttUNet, self).__init__()
 
         self.Maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.Conv1 = conv_block(ch_in=img_ch, ch_out=64)
+        self.Conv1 = conv_block(ch_in=in_channels, ch_out=64)
         self.Conv2 = conv_block(ch_in=64, ch_out=128)
         self.Conv3 = conv_block(ch_in=128, ch_out=256)
         self.Conv4 = conv_block(ch_in=256, ch_out=512)
@@ -92,7 +92,7 @@ class AttU_Net(nn.Module):
         self.Att2 = Attention_block(F_g=64, F_l=64, F_int=32)
         self.Up_conv2 = conv_block(ch_in=128, ch_out=64)
 
-        self.Conv_1x1 = nn.Conv2d(64, output_ch, kernel_size=1, stride=1, padding=0)
+        self.Conv_1x1 = nn.Conv2d(64, out_channels, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
 
