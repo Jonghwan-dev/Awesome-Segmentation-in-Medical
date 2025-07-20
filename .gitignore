@@ -107,7 +107,7 @@ saved/
 datasets/
 checkpoints/
 wandb/
-/logger
+logger/
 *.csv
 *.ckpt
 *.pth
