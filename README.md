@@ -12,12 +12,12 @@ The core philosophy of this project is to establish a **fair and unbiased evalua
 
 - [Our Vision](#our-vision-)
 - [Key Features](#key-features-)
+- [Supported Models & Datasets](#supported-models--datasets-)
 - [Project Structure](#project-structure-)
 - [Installation](#installation-)
 - [Running Experiments](#running-experiments-)
 - [Understanding the Results](#understanding-the-results-)
 - [How to Extend](#how-to-extend-️)
-- [Supported Models & Datasets](#supported-models--datasets-)
 - [Acknowledgements](#acknowledgements-)
 - [License & Citation](#license--citation-)
 
@@ -50,9 +50,39 @@ Awesome-BUS-Benchmark is engineered to solve these problems. We provide a standa
   
 * **⚙️ Automated & Configurable Pipelines:** Comes with powerful shell scripts (run\_cnn.sh, run\_vit.sh) that automate the entire workflow: k-fold training, testing, and results aggregation. All experiment parameters (model choice, learning rate, epochs, etc.) are controlled via central YAML configuration files, allowing for rapid and reproducible experiments.
   
-
+  
 ---
+  
 
+## **Supported Models & Datasets 📖**
+
+### **Model Zoo**
+|     Model     |                        Original code                         |                          Reference                           |
+| :-------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|      **U-Net**      | [Caffe](http://lmb.informatik.uni-freiburg.de/people/ronneber/u-net) |      [MICCAI'15](https://arxiv.org/pdf/1505.04597.pdf)       |
+| **Attention U-Net** | [Pytorch](https://github.com/ozan-oktay/Attention-Gated-Networks) |       [MIDL'18](https://arxiv.org/pdf/1804.03999.pdf)       |
+|     **U-Net++**     |    [Pytorch](https://github.com/MrGiovanni/UNetPlusPlus)     | [MICCAI'18](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7329239/pdf/nihms-1600717.pdf) |
+|    **U-Net 3+**     |    [Pytorch](https://github.com/ZJUGiveLab/UNet-Version)     |        [ICASSP'20](https://arxiv.org/pdf/2004.08790)         |
+|    **TransUnet**    |      [Pytorch](https://github.com/Beckschen/TransUNet)       |       [Arxiv'21](https://arxiv.org/pdf/2102.04306.pdf)       |
+|      **MedT**       | [Pytorch](https://github.com/jeya-maria-jose/Medical-Transformer) |      [MICCAI'21](https://arxiv.org/pdf/2102.10662.pdf)       |
+|      **UNeXt**     | [Pytorch](https://github.com/jeya-maria-jose/UNeXt-pytorch)  |      [MICCAI'22](https://arxiv.org/pdf/2203.04967.pdf)       |
+|    **SwinUnet**     |    [Pytorch](https://github.com/HuCaoFighting/Swin-Unet)     |       [ECCV'22](https://arxiv.org/pdf/2105.05537.pdf)        |
+|     **CMU-Net**     |       [Pytorch](https://github.com/FengheTan9/CMU-Net)       |       [ISBI'23](https://arxiv.org/pdf/2210.13012.pdf)        |
+|     **CMUNeXt**     |       [Pytorch](https://github.com/FengheTan9/CMUNeXt)       |       [ISBI'24](https://arxiv.org/pdf/2308.01239.pdf)       |
+
+### **Datasets**
+
+| Dataset | Official Source | Download link|
+| :---- | :---- | :---- |
+| **BUSI** | [Dataset of Breast Ultrasound Images \- Al-Dhabyani et al.](https://www.sciencedirect.com/science/article/pii/S2352340919312181?via%3Dihub) | [Download Data](https://scholar.cu.edu.eg/?q=afahmy/pages/dataset) |
+| **BUSBRA** | [Breast Ultrasound Bi-Rads Classification... \- Ribeiro et al.](https://pubmed.ncbi.nlm.nih.gov/37937827/) | [Download Data](https://zenodo.org/records/8231412) |
+| **BUS-UC** | [Breast Ultrasound Cancer Image Classification \- Garodia et al.](https://www.sciencedirect.com/science/article/pii/S0952197623014768?via%3Dihub) | [Download Data](https://data.mendeley.com/datasets/3ksd7w7jkx/1) |
+| **BUS-UCLM** | [BUS-UCLM: Breast ultrasound lesion segmentation dataset. \- Noelia Vallez et al.,2025](https://www.nature.com/articles/s41597-025-04562-3) | [Download Data](https://github.com/noeliavallez/BUS-UCLM-Dataset) |
+| **Yap2018** | [Breast ultrasound lesions recognition: a preliminary study... \- Yap et al.](https://pubmed.ncbi.nlm.nih.gov/28796627/) | [Download Data](https://www2.docm.mmu.ac.uk/STAFF/m.yap/files/BUS_ReleaseAgreement.pdf) |
+
+  
+---
+  
 ## **Project Structure 📂**
 
 The repository is organized logically to separate concerns and facilitate ease of use and extension.
@@ -210,32 +240,6 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 1. Add the raw dataset folder to the datasets/ directory.  
 2. In data/prepare\_datasets.py, add a new preparation method (e.g., \_prepare\_mynew\_dataset) inside the PrepareDataset class.  
 3. Register your new method in the dispatcher dictionary within the run method.
-
----
-
-## **Supported Models & Datasets 📖**
-
-### **Model Zoo**
-
-| Model | Publication |
-| :---- | :---- |
-| **UNet** | [U-Net: Convolutional Networks for Biomedical Image Segmentation (MICCAI 2015\)](https://arxiv.org/abs/1505.04597) |
-| **AttUNet** | [Attention U-Net: Learning Where to Look for the Pancreas (MIDL 2018\)](https://arxiv.org/abs/1804.03999) |
-| **UNet++** | [UNet++: A Nested U-Net Architecture for Medical Image Segmentation (TMI 2019\)](https://arxiv.org/abs/1807.10165) |
-| **UNet 3+** | [UNet 3+: A Full-Scale Connected UNet for Medical Image Segmentation (ICASSP 2020\)](https://arxiv.org/abs/2004.08790) |
-| **TransUnet** | [TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation (2021)](https://arxiv.org/abs/2102.04306) |
-| **Swin-Unet** | [Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation (2021)](https://arxiv.org/abs/2105.05537) |
-| **MedT** | [Medical Transformer: Gated Axial-Attention for Medical Image Segmentation (MICCAI 2021\)](https://arxiv.org/abs/2102.10662) |
-
-### **Datasets**
-
-| Dataset | Official Source |
-| :---- | :---- |
-| **BUSI** | [Dataset of Breast Ultrasound Images \- Al-Dhabyani et al.](https://www.sciencedirect.com/science/article/pii/S2352340919312181?via%3Dihub) | [Download Data](https://scholar.cu.edu.eg/?q=afahmy/pages/dataset) |
-| **BUSBRA** | [Breast Ultrasound Bi-Rads Classification... \- Ribeiro et al.](https://pubmed.ncbi.nlm.nih.gov/37937827/) | [Download Data](https://zenodo.org/records/8231412) |
-| **BUS-UC** | [Breast Ultrasound Cancer Image Classification \- Garodia et al.](https://www.sciencedirect.com/science/article/pii/S0952197623014768?via%3Dihub) | [Download Data](https://data.mendeley.com/datasets/3ksd7w7jkx/1) |
-| **BUS-UCLM** | [BUS-UCLM: Breast ultrasound lesion segmentation dataset. \- Noelia Vallez et al.,2025](https://www.nature.com/articles/s41597-025-04562-3) | [Download Data](https://github.com/noeliavallez/BUS-UCLM-Dataset) |
-| **Yap2018** | [Breast ultrasound lesions recognition: a preliminary study... \- Yap et al.](https://pubmed.ncbi.nlm.nih.gov/28796627/) | [Download Data](https://www2.docm.mmu.ac.uk/STAFF/m.yap/files/BUS_ReleaseAgreement.pdf) |
 
 ---
 
