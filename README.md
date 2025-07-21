@@ -231,19 +231,19 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 
 | Dataset | Official Source |
 | :---- | :---- |
-| **BUSI** | [Dataset of Breast Ultrasound Images \- Al-Dhabyani et al.](https://scholar.cu.edu.eg/?q=afahmy/pages/dataset) |
-| **BUSBRA** | [Breast Ultrasound Bi-Rads Classification... \- Ribeiro et al.](https://www.kaggle.com/datasets/aryashah2k/breast-ultrasound-images-dataset) |
-| **BUS-UC** | [Breast Ultrasound Cancer Image Classification \- Garodia et al.](https://www.google.com/search?q=https://data.mendeley.com/datasets/w8y6n4x6s5/1) |
-| **BUS-UCLM** | [BUS-UCLM: A Public Dataset for Breast Lesion Recognition... \- Pérez-Paredes et al.](https://www.google.com/search?q=https://springernature.figshare.com/collections/BUS-UCLM_A_Public_Dataset_for_Breast_Lesion_Recognition_in_Ultrasound_Imaging/5933392) |
-| **Yap2018** | [Breast ultrasound lesions recognition: a preliminary study... \- Yap et al.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5710896/) |
+| **BUSI** | [Dataset of Breast Ultrasound Images \- Al-Dhabyani et al.](https://www.sciencedirect.com/science/article/pii/S2352340919312181?via%3Dihub) | [Download Data](https://scholar.cu.edu.eg/?q=afahmy/pages/dataset) |
+| **BUSBRA** | [Breast Ultrasound Bi-Rads Classification... \- Ribeiro et al.](https://pubmed.ncbi.nlm.nih.gov/37937827/) | [Download Data](https://zenodo.org/records/8231412) |
+| **BUS-UC** | [Breast Ultrasound Cancer Image Classification \- Garodia et al.](https://www.sciencedirect.com/science/article/pii/S0952197623014768?via%3Dihub) | [Download Data](https://data.mendeley.com/datasets/3ksd7w7jkx/1) |
+| **BUS-UCLM** | [BUS-UCLM: Breast ultrasound lesion segmentation dataset. \- Noelia Vallez et al.,2025](https://www.nature.com/articles/s41597-025-04562-3) | [Download Data](https://github.com/noeliavallez/BUS-UCLM-Dataset) |
+| **Yap2018** | [Breast ultrasound lesions recognition: a preliminary study... \- Yap et al.](https://pubmed.ncbi.nlm.nih.gov/28796627/) | [Download Data](https://www2.docm.mmu.ac.uk/STAFF/m.yap/files/BUS_ReleaseAgreement.pdf) |
 
 ---
 
 ## **Acknowledgements 🙏**
 
-+ This project's structure and methodology are heavily inspired by [Medical-Image-Segmentation-Benchmarks](https://www.google.com/search?q=https://github.com/hsiangyuzhao/Medical-Image-Segmentation-Benchmarks).
++ This project's structure and methodology are heavily inspired by [Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks).
 
-+ Helper functions from [CMU-Net](https://www.google.com/search?q=https://github.com/Jonghwan-dev/CMU-Net) and [Image\_Segmentation](https://www.google.com/search?q=https://github.com/hsiangyuzhao/Image_Segmentation) were also utilized. We extend our gratitude to the authors of these repositories for making their excellent work public.
++ Helper functions from [CMU-Net](https://github.com/FengheTan9/CMU-Net) and [Image\_Segmentation](https://github.com/LeeJunHyun/Image_Segmentation) were also utilized. We extend our gratitude to the authors of these repositories for making their excellent work public.
 
 ---
 
@@ -253,9 +253,9 @@ This project is released under the **MIT License**. See [LICENSE](LICENSE) for d
 If you use this benchmark in your research, please consider citing it:
 ```
 @misc{awesomebusbenchmark2024,  
-  author \= {Jonghwan Lee},  
+  author \= {Jonghwan Kim},  
   title \= {Awesome Segmentation in Medical Imaging: A Breast Ultrasound Benchmark},  
-  year \= {2024},  
+  year \= {2025},  
   publisher \= {GitHub},  
   journal \= {GitHub repository},  
   howpublished \= {\\url{https://github.com/Jonghwan-dev/Awesome\_Segmentation\_in\_Medical}},  
