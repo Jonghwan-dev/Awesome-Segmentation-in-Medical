@@ -76,7 +76,7 @@ class UNetplus(nn.Module):
         super(UNetplus,self).__init__()
 
         filters = [64, 128, 256, 512]
-        resnet = models.resnet34(pretrained=False)
+        resnet = models.resnet34(weights=None)
         self.base_size = 512
         self.crop_size = 512
         self._up_kwargs = {'mode': 'bilinear', 'align_corners': True}

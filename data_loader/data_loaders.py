@@ -1,4 +1,4 @@
-# data_loaders.py
+# data_loader/data_loaders.py
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader

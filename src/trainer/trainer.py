@@ -1,4 +1,4 @@
-# trainer.py
+# src/trainer/trainer.py
 import os
 import numpy as np
 import torch
@@ -26,7 +26,8 @@ class Trainer:
         self.lr_scheduler = lr_scheduler
         self.metric_fns = metrics
         
-        self.train_metrics = MetricTracker('loss', 'iou')
+        train_metric_keys = ['loss', 'iou_score'] 
+        self.train_metrics = MetricTracker(*train_metric_keys)
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_fns])
 
         self.start_epoch = 1
@@ -37,11 +38,9 @@ class Trainer:
         self.early_stopping_patience = config.get('early_stopping_patience', 30)
         self.early_stopping_counter = 0
 
-        # --- FIX: Simplified state for dynamic ranking ---
         self.metric_history = [] # Store dicts of metrics for each epoch
         self.best_epoch_info = {} # Store info of the best epoch
 
-        # --- Wandb specific setup ---
         if self.val_loader:
             self.fixed_val_batch = next(iter(self.val_loader))
 
@@ -58,7 +57,6 @@ class Trainer:
                 
                 self._log_validation_images(epoch)
                 
-                # --- FIX: Use the new dynamic ranking system ---
                 is_new_best = self._update_and_check_best(val_log, epoch)
                 
                 if is_new_best:
@@ -82,28 +80,22 @@ class Trainer:
         Appends current metrics to history, re-calculates ranks for all epochs,
         and determines if the current epoch is the new best.
         """
-        # 1. Add current epoch's metrics to history
         current_metrics = {'epoch': current_epoch, **val_log}
         self.metric_history.append(current_metrics)
         
-        # 2. Create a DataFrame from the entire history
         history_df = pd.DataFrame(self.metric_history)
         
-        # 3. Calculate ranks for each metric. Lower rank is better.
         history_df['loss_rank'] = history_df['loss'].rank(ascending=True, method='dense')
-        history_df['hd95_rank'] = history_df['hd95_batch'].rank(ascending=True, method='dense')
-        history_df['iou_rank'] = history_df['iou_score'].rank(ascending=False, method='dense')
-        history_df['dice_rank'] = history_df['dice_score'].rank(ascending=False, method='dense')
+        history_df['hd95_batch_rank'] = history_df['hd95_batch'].rank(ascending=True, method='dense')
+        history_df['iou_score_rank'] = history_df['iou_score'].rank(ascending=False, method='dense')
+        history_df['dice_score_rank'] = history_df['dice_score'].rank(ascending=False, method='dense')
         
-        # 4. Calculate the average rank score for each epoch
-        rank_cols = ['loss_rank', 'hd95_rank', 'iou_rank', 'dice_rank']
+        rank_cols = ['loss_rank', 'hd95_batch_rank', 'iou_score_rank', 'dice_score_rank']
         history_df['avg_rank'] = history_df[rank_cols].mean(axis=1)
         
-        # 5. Find the epoch with the best (minimum) average rank
         best_epoch_idx = history_df['avg_rank'].idxmin()
         self.best_epoch_info = history_df.loc[best_epoch_idx].to_dict()
         
-        # 6. Check if the current epoch is the new best epoch
         if self.best_epoch_info['epoch'] == current_epoch:
             print(f"New best model found at epoch {current_epoch}!")
             print(f"  - Avg Rank: {self.best_epoch_info['avg_rank']:.4f}")
@@ -123,11 +115,21 @@ class Trainer:
             loss = self.criterion(output, target.float())
             loss.backward()
             self.optimizer.step()
-            self.train_metrics.update('loss', loss.item())
+
+            self.train_metrics.update('loss', loss.item(), n=image.size(0))
+            
             with torch.no_grad():
                 pred_sigmoid = torch.sigmoid(output.detach())
-                self.train_metrics.update('iou', iou_score(pred_sigmoid, target))
-            progress_bar.set_postfix(loss=loss.item(), iou=self.train_metrics.avg('iou'))
+                # iou_score ->(sum, count)
+                iou_sum, iou_count = iou_score(pred_sigmoid, target)
+                if iou_count > 0:
+                    batch_avg = iou_sum / iou_count
+                    # MetricTracker send to (key, batch_avg, batch_count)
+                    self.train_metrics.update('iou_score', batch_avg, n=iou_count)
+
+            
+            progress_bar.set_postfix(loss=loss.item(), iou=self.train_metrics.avg('iou_score'))
+            
         if self.lr_scheduler: self.lr_scheduler.step()
         return self.train_metrics.result()
 
@@ -142,10 +144,17 @@ class Trainer:
                 output = self.model(image)
                 loss = self.criterion(output, target.float())
                 pred_sigmoid = torch.sigmoid(output)
-                self.valid_metrics.update('loss', loss.item())
+                
+                self.valid_metrics.update('loss', loss.item(), n=image.size(0))
+
                 for met in self.metric_fns:
-                    metric_value = met(pred_sigmoid, target)
-                    self.valid_metrics.update(met.__name__, metric_value)
+                    # each metric func -> (sum, count)
+                    metric_sum, metric_count = met(pred_sigmoid, target)
+                    if metric_count > 0:
+                        batch_avg = metric_sum / metric_count
+                        # MetricTracker send to (key, batch_avg, batch_count)
+                        self.valid_metrics.update(met.__name__, batch_avg, n=metric_count)
+
         return self.valid_metrics.result()
 
     def _save_checkpoint(self):
@@ -162,8 +171,6 @@ class Trainer:
         if wandb.run:
             artifact = wandb.Artifact(name=f"{wandb.run.name}-best-model", type="model")
             artifact.add_file(filename)
-            wandb.log_artifact(artifact, aliases=["best"])
-            print(f"Checkpoint saved to {filename} and logged to wandb.")
 
     def _log_validation_images(self, epoch):
         """Logs a fixed batch of validation images, masks, and predictions to wandb."""

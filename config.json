@@ -1,71 +1,72 @@
 {
-    "name": "BUS_Segmentation_UNet",
-    "n_gpu": 1,
-  
-    "arch": {
-      "type": "UNet",
-      "args": {
-        "in_channels": 1,
-        "out_channels": 1
-      }
-    },
-  
-    "data": {
-      "datasets": ["busi"],
-      "force_prepare": false,
-      "target_size": 224,
-      "batch_size": 16,
-      "num_workers": 8
-    },
-  
-    "optimizer": {
-      "type": "AdamW",
-      "args": {
-        "lr": 0.001,
-        "weight_decay": 1e-4
-      }
-    },
-  
-    "loss": {
-      "type": "DiceBCELoss",
-      "args": {}
-    },
-  
-    "metrics": [
-      "pixel_accuracy", "dice_score", "hd95_batch", "iou_score"
-    ],
-  
-    "lr_scheduler": {
-      "type": "CosineAnnealingLR",
-      "args": {
-        "T_max": 300,
-        "eta_min": 1e-5
-      }
-    },
-  
-    "trainer": {
-      "epochs": 300,
-      "k_folds": 5,
-      "checkpoint_dir": "checkpoints/",
-      "early_stopping_patience": 25
-    },
-  
-    "wandb": {
-      "project": "Breast-US-Segmentation",
-      "disable": false
-    },
-    
-    "system": {
-        "seed": 42
-    },
-  
-    "swin_unet_args": {
-        "cfg": "./src/models/swinUnet/swin_tiny_patch4_window7_224_lite.yaml",
-        "zip": false,
-        "cache_mode": "part",
-        "resume": null,
-        "accumulation-steps": 0,
-        "use-checkpoint": false,
-        "opts": null
+  "name": "BUS_Segmentation_Experiment",
+  "n_gpu": 1,
+
+  "arch": {
+    "type": "UNet",
+    "args": {
+      "in_channels": 1,
+      "out_channels": 1
     }
+  },
+
+  "data": {
+    "datasets": ["busi"],
+    "force_prepare": false,
+    "target_size": 224,
+    "batch_size": 16,
+    "num_workers": 8
+  },
+
+  "optimizer": {
+    "type": "AdamW",
+    "args": {
+      "lr": 0.001,
+      "weight_decay": 1e-4
+    }
+  },
+
+  "loss": {
+    "type": "DiceBCELoss",
+    "args": {}
+  },
+
+  "metrics": [
+    "pixel_accuracy", "dice_score", "hd95_batch", "iou_score"
+  ],
+
+  "lr_scheduler": {
+    "type": "CosineAnnealingLR",
+    "args": {
+      "T_max": 300,
+      "eta_min": 1e-5
+    }
+  },
+
+  "trainer": {
+    "epochs": 300,
+    "k_folds": 5,
+    "checkpoint_dir": "checkpoints/",
+    "early_stopping_patience": 25,
+    "freeze_mode": "none"
+  },
+
+  "wandb": {
+    "project": "Breast-US-Segmentation",
+    "disable": false
+  },
+  
+  "system": {
+    "seed": 42
+  },
+
+  "vit_seg_args": {
+    "vit_patches_path": "path/to/your/R50+ViT-B_16.npz"
+  },
+
+  "swin_unet_args": {
+    "cfg": "./src/models/ViT_based/swinUnet/configs/swin_tiny_patch4_window7_224_lite.yaml",
+    "opts": null,
+    "PRETRAIN_CKPT": "./pretrained_models/swin_tiny_patch4_window7_224.pth"
   }
+}

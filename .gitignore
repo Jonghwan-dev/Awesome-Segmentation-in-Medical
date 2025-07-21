@@ -108,6 +108,7 @@ datasets/
 checkpoints/
 wandb/
 logger/
+results/
 check_results.py
 *.csv
 *.ckpt

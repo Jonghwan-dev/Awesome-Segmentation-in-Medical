@@ -1,4 +1,4 @@
-# utils/losses.py
+# src/utils/losses.py
 
 import torch
 import torch.nn as nn
