@@ -173,9 +173,12 @@ python -c "from data.prepare_datasets import PrepareDataset; PrepareDataset().ru
 
 This produces:
 
-- `data/csv/` with `busi.csv`, `busbra.csv`, etc.
-- `data/splits/` containing one held‑out test split and 5 stratified folds for CV.
-
+- All dataset information is managed in CSV files located in the data/csv/ directory.  
+  
+- Each file (e.g., busi.csv, busbra.csv) corresponds to a single dataset.  
+  
+- Data splits for training and testing are defined by a split column directly within these files.  
+  
 ---
 
 ## 🚀 Running Experiments
@@ -183,7 +186,8 @@ This produces:
 ### 1. CNN Models
 
 ```bash
-bash scripts/run_cnn.sh
+$ chmod u+x ./run_cnn.sh
+bash ./run_cnn.sh
 ```
 
 Performs k-fold cross-validation for UNet, AttUNet, UNet++ and UNet3+, then evaluates on the held‑out test set.
@@ -191,7 +195,8 @@ Performs k-fold cross-validation for UNet, AttUNet, UNet++ and UNet3+, then eval
 ### 2. Transformer Models
 
 ```bash
-bash scripts/run_vit.sh
+$ chmod u+x ./run_vit.sh
+bash ./run_vit.sh
 ```
 
 Trains TransUNet, Swin-Unet and MedT with the same splits.
@@ -199,7 +204,8 @@ Trains TransUNet, Swin-Unet and MedT with the same splits.
 ### 3. Transfer Learning
 
 ```bash
-bash scripts/transfer_run.sh
+$ chmod u+x ./transfer_run.sh
+bash ./transfer_run.sh
 ```
 
 Fine-tunes CNN or Transformer backbones pretrained on natural images.
@@ -218,12 +224,76 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 
 | Model | Dice (DSC) | IoU | HD95 | GFLOPs | Params (M) |
 | :---- | :---- | :---- | :---- | :---- | :---- |
-| UNet | \- | \- | \- | 17.34 | 7.76 |
-| AttUNet | \- | \- | \- | 18.06 | 8.71 |
-| SwinUnet | \- | \- | \- | 13.96 | 27.20 |
-| ... | ... | ... | ... | ... | ... |
+| **UNet** | 0.7095 ± 0.0300 | 0.6290 ± 0.0346 | 36.6824 ± 9.7886 | 50.11 | 34.53 |
+| **AttUNet** | 0.7400 ± 0.0257 | 0.6631 ± 0.0270 | 37.5227 ± 3.6763 | 50.96 | 34.88 |
+| **UNet++** | 0.7307 ± 0.0220 | 0.6545 ± 0.0230 | 38.3222 ± 7.5356 | 28.73 | 26.90 |
+| **UNet 3+** | 0.7194 ± 0.0268 | 0.6402 ± 0.0303 | 34.5574 ± 6.3702 | 152.87 | 26.97 |
+| **UNeXt** | 0.6955 ± 0.0305 | 0.6150 ± 0.0322 | 40.1467 ± 6.0638 | 0.42 | 1.47 |
+| **CMUNet** | 0.6913 ± 0.0223 | 0.6129 ± 0.0223 | 41.1387 ± 4.6279 | 69.81 | 49.93 |
+| **CMUNeXt** | 0.7217 ± 0.0092 | 0.6439 ± 0.0092 | 35.5400 ± 6.5903 | 5.66 | 3.15 |
+| **TransUnet** | 0.7226 ± 0.0166 | 0.6412 ± 0.0183 | 32.3411 ± 3.4289 | 75.17 | 179.07 |
+| **MedT** | 0.5759 ± 0.0435 | 0.4900 ± 0.0461 | 53.7967 ± 9.0494 | 4.33 | 1.13 |
+| **SwinUnet** | \- | \- | \- | \- | \- |
 
-*(Repeat tables for BUSBRA, BUS-UC, BUS-UCLM, and Yap2018 datasets here.)*
+### **BUS-UC Dataset Performance**
+
+| Model | Dice (DSC) | IoU | HD95 | GFLOPs | Params (M) |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| **UNet** | 0.8905 ± 0.0068 | 0.8189 ± 0.0077 | 16.8561 ± 0.9736 | 50.11 | 34.53 |
+| **AttUNet** | 0.8948 ± 0.0021 | 0.8234 ± 0.0027 | 16.4403 ± 0.6161 | 50.96 | 34.88 |
+| **UNet++** | 0.9113 ± 0.0075 | 0.8463 ± 0.0099 | 10.8447 ± 1.8236 | 28.73 | 26.90 |
+| **UNet 3+** | 0.8900 ± 0.0060 | 0.8181 ± 0.0070 | 16.3550 ± 0.8623 | 152.87 | 26.97 |
+| **UNeXt** | 0.8921 ± 0.0153 | 0.8192 ± 0.0182 | 13.8724 ± 1.8751 | 0.42 | 1.47 |
+| **CMUNet** | 0.8983 ± 0.0132 | 0.8271 ± 0.0181 | 11.8369 ± 2.4165 | 69.81 | 49.93 |
+| **CMUNeXt** | 0.9049 ± 0.0025 | 0.8371 ± 0.0037 | 12.5182 ± 0.6259 | 5.66 | 3.15 |
+| **MedT** | 0.8703 ± 0.0046 | 0.7850 ± 0.0045 | 15.8071 ± 1.2704 | 4.33 | 1.13 |
+| **TransUnet** | \- | \- | \- | \- | \- |
+| **SwinUnet** | \- | \- | \- | \- | \- |
+
+### **BUS-UCLM Dataset Performance**
+
+| Model | Dice (DSC) | IoU | HD95 | GFLOPs | Params (M) |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| **UNet** | 0.7411 ± 0.0211 | 0.7115 ± 0.0196 | 42.8127 ± 3.2033 | 50.11 | 34.53 |
+| **AttUNet** | 0.7264 ± 0.0444 | 0.6961 ± 0.0468 | 44.5037 ± 4.6944 | 50.96 | 34.88 |
+| **UNet++** | 0.8214 ± 0.0177 | 0.7908 ± 0.0187 | 25.3912 ± 3.8422 | 28.73 | 26.90 |
+| **UNet 3+** | 0.7864 ± 0.0336 | 0.7550 ± 0.0332 | 29.9108 ± 8.2026 | 152.87 | 26.97 |
+| **UNeXt** | 0.7744 ± 0.0219 | 0.7434 ± 0.0233 | 33.6618 ± 3.4316 | 0.42 | 1.47 |
+| **CMUNet** | 0.7625 ± 0.0248 | 0.7321 ± 0.0270 | 38.7341 ± 6.3967 | 69.81 | 49.93 |
+| **CMUNeXt** | 0.7821 ± 0.0220 | 0.7490 ± 0.0226 | 34.9975 ± 4.9092 | 5.66 | 3.15 |
+| **TransUnet** | 0.7675 ± 0.0221 | 0.7352 ± 0.0219 | 34.6927 ± 7.3986 | 75.17 | 179.07 |
+| **MedT** | \- | \- | \- | \- | \- |
+| **SwinUnet** | \- | \- | \- | \- | \- |
+
+### **BUSBRA Dataset Performance**
+
+| Model | Dice (DSC) | IoU | HD95 | GFLOPs | Params (M) |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| **UNet** | 0.8704 ± 0.0063 | 0.7958 ± 0.0080 | 12.8747 ± 1.4224 | 50.11 | 34.53 |
+| **AttUNet** | 0.8748 ± 0.0061 | 0.8021 ± 0.0074 | 11.5454 ± 1.0852 | 50.96 | 34.88 |
+| **UNet++** | 0.8789 ± 0.0024 | 0.8064 ± 0.0031 | 10.6655 ± 0.6798 | 28.73 | 26.90 |
+| **UNet 3+** | 0.8787 ± 0.0054 | 0.8053 ± 0.0064 | 11.5249 ± 1.0132 | 152.87 | 26.97 |
+| **UNeXt** | 0.8562 ± 0.0064 | 0.7751 ± 0.0064 | 13.7112 ± 2.1483 | 0.42 | 1.47 |
+| **CMUNet** | 0.8705 ± 0.0050 | 0.7950 ± 0.0061 | 11.2522 ± 1.0243 | 69.81 | 49.93 |
+| **CMUNeXt** | 0.8756 ± 0.0043 | 0.8013 ± 0.0048 | 11.3662 ± 1.2649 | 5.66 | 3.15 |
+| **MedT** | 0.8151 ± 0.0053 | 0.7157 ± 0.0071 | 15.5866 ± 0.6548 | 4.33 | 1.13 |
+| **TransUnet** | \- | \- | \- | \- | \- |
+| **SwinUnet** | \- | \- | \- | \- | \- |
+
+### **Yap2018 Dataset Performance**
+
+| Model | Dice (DSC) | IoU | HD95 | GFLOPs | Params (M) |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| **UNet** | 0.5451 ± 0.0530 | 0.4506 ± 0.0448 | 62.3235 ± 21.4890 | 50.11 | 34.53 |
+| **AttUNet** | 0.6072 ± 0.0411 | 0.5057 ± 0.0357 | 45.5852 ± 26.4043 | 50.96 | 34.88 |
+| **UNet++** | 0.5769 ± 0.0541 | 0.4882 ± 0.0534 | 53.9371 ± 21.8446 | 28.73 | 26.90 |
+| **UNet 3+** | 0.6294 ± 0.0263 | 0.5329 ± 0.0274 | 32.0159 ± 11.0018 | 152.87 | 26.97 |
+| **UNeXt** | 0.5403 ± 0.0315 | 0.4455 ± 0.0317 | 58.4016 ± 10.0436 | 0.42 | 1.47 |
+| **CMUNet** | 0.5511 ± 0.0295 | 0.4524 ± 0.0327 | 55.6650 ± 13.0657 | 69.81 | 49.93 |
+| **CMUNeXt** | 0.6313 ± 0.0463 | 0.5446 ± 0.0466 | 53.3332 ± 17.7294 | 5.66 | 3.15 |
+| **TransUnet** | 0.6715 ± 0.0581 | 0.5806 ± 0.0582 | 35.7003 ± 11.6601 | 75.17 | 179.07 |
+| **MedT** | \- | \- | \- | \- | \- |
+| **SwinUnet** | \- | \- | \- | \- | \- |
 
 ---
 
