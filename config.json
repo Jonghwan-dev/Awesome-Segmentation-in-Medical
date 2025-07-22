@@ -21,8 +21,8 @@
   "optimizer": {
     "type": "AdamW",
     "args": {
-      "lr": 0.001,
-      "weight_decay": 1e-4
+      "lr": 0.0001,
+      "weight_decay": 1e-5
     }
   },
 
@@ -38,16 +38,16 @@
   "lr_scheduler": {
     "type": "CosineAnnealingLR",
     "args": {
-      "T_max": 300,
+      "T_max": 800,
       "eta_min": 1e-5
     }
   },
 
   "trainer": {
-    "epochs": 300,
+    "epochs": 800,
     "k_folds": 5,
     "checkpoint_dir": "checkpoints/",
-    "early_stopping_patience": 25,
+    "early_stopping_patience": 80,
     "freeze_mode": "none"
   },
 

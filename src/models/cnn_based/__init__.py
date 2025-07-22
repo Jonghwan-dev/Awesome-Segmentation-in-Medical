@@ -5,3 +5,4 @@ from .UNet3plus import UNet3plus
 from .UNeXt import UNeXt
 from .CMUNet import CMUNet
 from .CMUNeXt import CMUNeXt
+from .UKAN import UKAN

@@ -313,6 +313,36 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 
 ---
 
+## GitHub Topics
+```text
+awesome-list
+medical-image-segmentation
+breast-ultrasound
+BUS
+deep-learning
+benchmark
+reproducibility
+computer-vision
+python
+pytorch
+tensorflow
+```
+
+---
+
+## Categories
+
+- **📚 Papers**: Key papers and review materials
+- **🗂️ Datasets**: Public BUS datasets and download information
+- **🤖 Models**: Implemented segmentation model architectures
+- **📈 Metrics & Evaluation**: Main evaluation metrics (Dice, IoU, HD95, etc.)
+- **⚙️ Tools & Scripts**: Automation scripts and utility functions
+- **💡 Examples & Demo**: Example code, GIF demonstrations, and usage guides
+- **🏆 Benchmarks & Leaderboard**: Model performance comparison tables and rankings
+- **❓ FAQ**: Frequently asked questions and troubleshooting tips
+
+---
+
 ## **Acknowledgements 🙏**
 
 + This project's structure and methodology are heavily inspired by [Medical-Image-Segmentation-Benchmarks](https://github.com/FengheTan9/Medical-Image-Segmentation-Benchmarks).

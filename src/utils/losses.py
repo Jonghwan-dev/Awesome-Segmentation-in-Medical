@@ -7,6 +7,25 @@ import kornia
 import numpy as np
 from scipy.ndimage import distance_transform_edt as edt
 
+try:
+    from .LovaszSoftmax.pytorch.lovasz_losses import lovasz_hinge
+except ImportError:
+    pass
+
+__all__ = ['DiceBCELoss', 'LovaszHingeLoss']
+
+class LovaszHingeLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, input, target):
+        input = input.squeeze(1)
+        target = target.squeeze(1)
+        loss = lovasz_hinge(input, target, per_image=True)
+
+        return loss
+    
+
 class FocalLoss(nn.Module):
     
     def __init__(self, alpha=0.8, gamma=2):
@@ -88,7 +107,8 @@ class DiceBCELoss(nn.Module):
         dice_loss = 1 - (2. * intersection + smooth) / (inputs_sig.flatten().sum() + targets.flatten().sum() + smooth)
         
         return self.bce_weight * bce_loss + self.weight * dice_loss
-    
+
+
 class ComboLossHD(nn.Module):
 
     def __init__(self, alpha=0.8, gamma=2, edge_weight=1.0, boundary_weight=1.0, ce_weight=1.0, pos_weight=1.0):

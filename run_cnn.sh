@@ -5,7 +5,8 @@ set -e
 
 # --- CNN Experiment Configuration ---
 DATASETS=("busi" "bus_uc" "busbra" "bus_uclm" "yap2018")
-CNN_MODELS=("UNet" "AttUNet" "UNetplus" "UNet3plus" "UNeXt" "CMUNet" "CMUNeXt")
+CNN_MODELS=("UKAN")
+# CNN_MODELS=("UNet" "AttUNet" "UNetplus" "UNet3plus" "UNeXt" "CMUNet" "CMUNeXt")
 CONFIG_FILE="config.json"
 NUM_FOLDS=5
 
@@ -17,7 +18,7 @@ for dataset in "${DATASETS[@]}"; do
     echo "  STARTING CNN EXPERIMENT: DATASET=${dataset} | MODEL=${model}"
     echo "======================================================="
 
-    RUN_ID="${dataset}_${model}"
+    RUN_ID="lovasz_${dataset}_${model}"
     CHECKPOINT_BASE_DIR="checkpoints"
     
     # Check if training is already completed
@@ -42,7 +43,7 @@ for dataset in "${DATASETS[@]}"; do
     
     RESULTS_DIR="results"
     mkdir -p ${RESULTS_DIR}
-    RESULTS_CSV="${RESULTS_DIR}/results_${RUN_ID}.csv"
+    RESULTS_CSV="${RESULTS_DIR}/lovasz_results_${RUN_ID}.csv"
     echo "PA,DSC,HD95,IoU,GFLOPs,Params" > ${RESULTS_CSV}
 
     for fold in $(seq 1 ${NUM_FOLDS}); do
