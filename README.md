@@ -2,11 +2,10 @@
 
 # **Awesome Segmentation in Medical Imaging: A Breast Ultrasound Benchmark 🚀**
 
-A robust and reproducible framework for benchmarking deep learning models on Breast Ultrasound (BUS) image segmentation.1
+A robust and reproducible framework for benchmarking deep learning models on Breast Ultrasound (BUS) image segmentation, designed to ensure fair evaluation and prevent test set leakage.  
 
-The core philosophy of this project is to establish a **fair and unbiased evaluation pipeline**, addressing common pitfalls in machine learning research like test set leakage. By strictly separating cross-validation from final testing, this framework produces publication-ready results that accurately reflect a model's true generalization performance.
-
-*(An example GIF demonstrating segmentation results would be ideal here.)*
+The core philosophy of this project is to establish a fair and unbiased evaluation pipeline, addressing common pitfalls in machine learning research. By strictly separating cross-validation from final testing, this framework produces publication-ready results that accurately reflect a model's true generalization performance.  
+  
 
 ## **Table of Contents**
 
@@ -216,11 +215,23 @@ All logs and per-fold metrics are saved under `results/`.
 
 ## **Understanding the Results 📊**
 
-The performance tables should be populated with the results generated in the results/ directory. The evaluation methodology is key:
-
-The metrics reported are calculated on the **held-out test set**. The predictions on this test set are an **average of the 5 models** trained during the 5-fold cross-validation. This ensemble approach provides a more robust and stable measure of the model's true generalization capability, reducing the impact of random initialization or fold-specific performance variations.
-
+The performance metrics reported in the tables represent the mean ± standard deviation derived from a 5-fold cross-validation process. The evaluation methodology is as follows:  
+  
+1. A dedicated, held-out test set is created and separated before any training begins.  
+  
+2. The remaining data is used for 5-fold cross-validation, which results in 5 independently trained models.  
+  
+3. Each of these 5 models is then individually evaluated on the entire held-out test set. This yields 5 separate performance scores for each metric (e.g., 5 Dice scores, 5 IoU scores).  
+  
+4. The final value reported in the table (e.g., Dice: 0.7095 ± 0.0300) is the average and standard deviation of these 5 scores.  
+  
+This method effectively demonstrates the model's stability and generalization performance across different training data subsets.  
+  
 ### **BUSI Dataset Performance**
+
+<p align="center">
+  <em>TBD (To Be Determined): Some models are currently under training/validation. Results will be updated upon completion.</em>
+</p>
 
 | Model | Dice (DSC) | IoU | HD95 | GFLOPs | Params (M) |
 | :---- | :---- | :---- | :---- | :---- | :---- |
@@ -233,7 +244,8 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 | **CMUNeXt** | 0.7217 ± 0.0092 | 0.6439 ± 0.0092 | 35.5400 ± 6.5903 | 5.66 | 3.15 |
 | **TransUnet** | 0.7226 ± 0.0166 | 0.6412 ± 0.0183 | 32.3411 ± 3.4289 | 75.17 | 179.07 |
 | **MedT** | 0.5759 ± 0.0435 | 0.4900 ± 0.0461 | 53.7967 ± 9.0494 | 4.33 | 1.13 |
-| **SwinUnet** | \- | \- | \- | \- | \- |
+| **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
+
 
 ### **BUS-UC Dataset Performance**
 
@@ -247,8 +259,9 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 | **CMUNet** | 0.8983 ± 0.0132 | 0.8271 ± 0.0181 | 11.8369 ± 2.4165 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.9049 ± 0.0025 | 0.8371 ± 0.0037 | 12.5182 ± 0.6259 | 5.66 | 3.15 |
 | **MedT** | 0.8703 ± 0.0046 | 0.7850 ± 0.0045 | 15.8071 ± 1.2704 | 4.33 | 1.13 |
-| **TransUnet** | \- | \- | \- | \- | \- |
-| **SwinUnet** | \- | \- | \- | \- | \- |
+| **TransUnet** | TBD | TBD | TBD | TBD | TBD |
+| **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
+
 
 ### **BUS-UCLM Dataset Performance**
 
@@ -262,8 +275,9 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 | **CMUNet** | 0.7625 ± 0.0248 | 0.7321 ± 0.0270 | 38.7341 ± 6.3967 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.7821 ± 0.0220 | 0.7490 ± 0.0226 | 34.9975 ± 4.9092 | 5.66 | 3.15 |
 | **TransUnet** | 0.7675 ± 0.0221 | 0.7352 ± 0.0219 | 34.6927 ± 7.3986 | 75.17 | 179.07 |
-| **MedT** | \- | \- | \- | \- | \- |
-| **SwinUnet** | \- | \- | \- | \- | \- |
+| **MedT** | TBD | TBD | TBD | TBD | TBD |
+| **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
+
 
 ### **BUSBRA Dataset Performance**
 
@@ -277,8 +291,9 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 | **CMUNet** | 0.8705 ± 0.0050 | 0.7950 ± 0.0061 | 11.2522 ± 1.0243 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.8756 ± 0.0043 | 0.8013 ± 0.0048 | 11.3662 ± 1.2649 | 5.66 | 3.15 |
 | **MedT** | 0.8151 ± 0.0053 | 0.7157 ± 0.0071 | 15.5866 ± 0.6548 | 4.33 | 1.13 |
-| **TransUnet** | \- | \- | \- | \- | \- |
-| **SwinUnet** | \- | \- | \- | \- | \- |
+| **TransUnet** | TBD | TBD | TBD | TBD | TBD |
+| **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
+
 
 ### **Yap2018 Dataset Performance**
 
@@ -292,8 +307,9 @@ The metrics reported are calculated on the **held-out test set**. The prediction
 | **CMUNet** | 0.5511 ± 0.0295 | 0.4524 ± 0.0327 | 55.6650 ± 13.0657 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.6313 ± 0.0463 | 0.5446 ± 0.0466 | 53.3332 ± 17.7294 | 5.66 | 3.15 |
 | **TransUnet** | 0.6715 ± 0.0581 | 0.5806 ± 0.0582 | 35.7003 ± 11.6601 | 75.17 | 179.07 |
-| **MedT** | \- | \- | \- | \- | \- |
-| **SwinUnet** | \- | \- | \- | \- | \- |
+| **MedT** | TBD | TBD | TBD | TBD | TBD |
+| **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
+
 
 ---
 
