@@ -233,8 +233,12 @@ This method effectively demonstrates the model's stability and generalization pe
 ### **BUSI Dataset Performance**
 
 <p align="center">
+<<<<<<< Updated upstream
   <em>TBD (To Be Determined): Some models are currently under training/validation. 
   <br>Results will be updated upon completion.</em>  
+=======
+  <em>TBD (To Be Determined): Some models are currently under training/validation. <br>Results will be updated upon completion.</em>
+>>>>>>> Stashed changes
 </p>
 
 | Model | Dice (DSC) | IoU | HD95 | GFLOPs | Params (M) |
