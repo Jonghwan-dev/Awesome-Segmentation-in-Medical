@@ -68,6 +68,7 @@ Awesome-BUS-Benchmark is engineered to solve these problems. We provide a standa
 |    **SwinUnet**     |    [Pytorch](https://github.com/HuCaoFighting/Swin-Unet)     |       [ECCV'22](https://arxiv.org/pdf/2105.05537.pdf)        |
 |     **CMU-Net**     |       [Pytorch](https://github.com/FengheTan9/CMU-Net)       |       [ISBI'23](https://arxiv.org/pdf/2210.13012.pdf)        |
 |     **CMUNeXt**     |       [Pytorch](https://github.com/FengheTan9/CMUNeXt)       |       [ISBI'24](https://arxiv.org/pdf/2308.01239.pdf)       |
+|     **U-KAN**     |       [Pytorch](https://github.com/CUHK-AIM-Group/U-KAN)       |       [AAAI'25](https://arxiv.org/pdf/2406.02918.pdf)       |
 
 ### **Datasets**
 
@@ -90,42 +91,44 @@ Awesome_Segmentation_in_Medical/
 │
 ├── data/  
 │   ├── preprocessing/  
-│   │   ├── augmentation.py      # Data augmentation logic (rotations, flips, etc.)  
-│   │   └── preprocess.py        # Data preprocessing logic (resizing, normalization, etc.)  
-│   ├── prepare_datasets.py      # Script to standardize raw datasets and create CSVs with fold splits  
-│   └── synthetic_datasets.py    # Script for synthetic data generation (optional)  
+│   │   ├── augmentation.py        # Data augmentation logic (rotations, flips, etc.)  
+│   │   └── preprocess.py          # Data preprocessing logic (resizing, normalization, etc.)  
+│   ├── prepare_datasets.py        # Script to standardize raw datasets and create CSVs with fold splits  
+│   └── synthetic_datasets.py      # Script for synthetic data generation (optional)  
 │  
 ├── data_loader/  
-│   └── data_loaders.py          # Defines PyTorch DataLoaders for training/validation/testing  
+│   └── data_loaders.py            # Defines PyTorch DataLoaders for training/validation/testing  
 │  
-├── datasets/                    # (User-supplied) Directory to store raw downloaded datasets  
+├── datasets/                      # (User-supplied) Directory to store raw downloaded datasets  
 │  
 ├── src/  
-│   ├── models/                  # PyTorch model architecture definitions  
-│   │   ├── cnn_based/           # --- CNN-based models like UNet, AttUNet, UNet++, UNeXt, CMUNet  
-│   │   └── ViT_based/           # --- Transformer-based models like TransUnet, Swin-Unet, MedT  
+│   ├── models/                    # PyTorch model architecture definitions  
+│   │   ├── cnn_based/             # --- CNN-based models like UNet, AttUNet, UNet++, UNeXt, CMUNet, U-KAN  
+│   │   └── ViT_based/             # --- Transformer-based models like TransUnet, MedT, Swin-Unet  
 │   │  
 │   ├── trainer/  
-│   │   └── trainer.py           # Core training and validation loop logic (epochs, backprop, etc.)  
+│   │   └── trainer.py             # Core training and validation loop logic (epochs, backprop, etc.)  
 │   │  
-│   └── utils/                   # Core utilities and helper functions  
-│       ├── losses.py            # --- Loss functions for segmentation (DiceLoss, BCELoss, etc.)  
-│       ├── metrics.py           # --- Evaluation metrics (Dice, IoU, HD95, etc.)  
-│       ├── parse_config.py      # --- Functionality to read and parse the config.json file  
-│       └── util.py              # --- Other useful functions, such as logging  
+│   └── utils/                     # Core utilities and helper functions  
+│       ├── LovaszSoftmax/pytorch/ # --- The Lovász-Softmax loss: A tractable surrogate for the optimization of the intersection-over-union measure in neural networks     
+│       │   └── lovasz_losses.py   # --- Standalone PyTorch implementation of the Lovász hinge and Lovász-Softmax for the Jaccard index
+│       ├── losses.py              # --- Loss functions for segmentation (DiceLoss, BCELoss, etc.)  
+│       ├── metrics.py             # --- Evaluation metrics (Dice, IoU, HD95, etc.)  
+│       ├── parse_config.py        # --- Functionality to read and parse the config.json file  
+│       └── util.py                # --- Other useful functions, such as logging  
 │  
-├── results/                     # Stores all experiment outputs, including CSVs with metrics per fold  
+├── results/                       # Stores all experiment outputs, including CSVs with metrics per fold  
 │  
-├── .gitignore                   # List of files to be ignored by Git  
-├── config.json                  # Central configuration file to control all experiments (models, hyperparameters, etc.)  
-├── environment.yml              # File for Conda environment setup  
+├── .gitignore                     # List of files to be ignored by Git  
+├── config.json                    # Central configuration file to control all experiments (models, hyperparameters, etc.)  
+├── environment.yml                # File for Conda environment setup  
 │  
-├── run_cnn.sh                   # Entrypoint script to run CNN-based model experiments  
-├── run_vit.sh                   # Entrypoint script to run Transformer-based model experiments  
-├── run_transfer.sh              # Entrypoint script for transfer learning experiments  
+├── run_cnn.sh                     # Entrypoint script to run CNN-based model experiments  
+├── run_vit.sh                     # Entrypoint script to run Transformer-based model experiments  
+├── run_transfer.sh                # Entrypoint script for transfer learning experiments  
 │  
-├── train.py                     # Main executable file to start model training  
-└── test.py                      # Main executable file to test a trained model     
+├── train.py                       # Main executable file to start model training  
+└── test.py                        # Main executable file to test a trained model     
 ```
 
 ---
@@ -243,6 +246,7 @@ This method effectively demonstrates the model's stability and generalization pe
 | **UNeXt** | 0.6955 ± 0.0305 | 0.6150 ± 0.0322 | 40.1467 ± 6.0638 | 0.42 | 1.47 |
 | **CMUNet** | 0.6913 ± 0.0223 | 0.6129 ± 0.0223 | 41.1387 ± 4.6279 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.7217 ± 0.0092 | 0.6439 ± 0.0092 | 35.5400 ± 6.5903 | 5.66 | 3.15 |
+| **U-KAN** | 0.7427 ± 0.0086 | 0.6689 ± 0.0105 | 37.5375 ± 6.3250 | 5.25 | 9.38 |
 | **TransUnet** | 0.7226 ± 0.0166 | 0.6412 ± 0.0183 | 32.3411 ± 3.4289 | 75.17 | 179.07 |
 | **MedT** | 0.5759 ± 0.0435 | 0.4900 ± 0.0461 | 53.7967 ± 9.0494 | 4.33 | 1.13 |
 | **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
@@ -259,8 +263,9 @@ This method effectively demonstrates the model's stability and generalization pe
 | **UNeXt** | 0.8921 ± 0.0153 | 0.8192 ± 0.0182 | 13.8724 ± 1.8751 | 0.42 | 1.47 |
 | **CMUNet** | 0.8983 ± 0.0132 | 0.8271 ± 0.0181 | 11.8369 ± 2.4165 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.9049 ± 0.0025 | 0.8371 ± 0.0037 | 12.5182 ± 0.6259 | 5.66 | 3.15 |
-| **MedT** | 0.8703 ± 0.0046 | 0.7850 ± 0.0045 | 15.8071 ± 1.2704 | 4.33 | 1.13 |
+| **U-KAN** | 0.8978 ± 0.0045 | 0.8282 ± 0.0057 | 12.9284 ± 1.4239 | 5.25 | 9.38 |
 | **TransUnet** | TBD | TBD | TBD | TBD | TBD |
+| **MedT** | 0.8703 ± 0.0046 | 0.7850 ± 0.0045 | 15.8071 ± 1.2704 | 4.33 | 1.13 |
 | **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
 
 
@@ -275,6 +280,7 @@ This method effectively demonstrates the model's stability and generalization pe
 | **UNeXt** | 0.7744 ± 0.0219 | 0.7434 ± 0.0233 | 33.6618 ± 3.4316 | 0.42 | 1.47 |
 | **CMUNet** | 0.7625 ± 0.0248 | 0.7321 ± 0.0270 | 38.7341 ± 6.3967 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.7821 ± 0.0220 | 0.7490 ± 0.0226 | 34.9975 ± 4.9092 | 5.66 | 3.15 |
+| **U-KAN** | 0.7540 ± 0.0912 | 0.7266 ± 0.0939 | 47.3326 ± 13.5931 | 5.25 | 9.38 |
 | **TransUnet** | 0.7675 ± 0.0221 | 0.7352 ± 0.0219 | 34.6927 ± 7.3986 | 75.17 | 179.07 |
 | **MedT** | TBD | TBD | TBD | TBD | TBD |
 | **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
@@ -291,8 +297,9 @@ This method effectively demonstrates the model's stability and generalization pe
 | **UNeXt** | 0.8562 ± 0.0064 | 0.7751 ± 0.0064 | 13.7112 ± 2.1483 | 0.42 | 1.47 |
 | **CMUNet** | 0.8705 ± 0.0050 | 0.7950 ± 0.0061 | 11.2522 ± 1.0243 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.8756 ± 0.0043 | 0.8013 ± 0.0048 | 11.3662 ± 1.2649 | 5.66 | 3.15 |
-| **MedT** | 0.8151 ± 0.0053 | 0.7157 ± 0.0071 | 15.5866 ± 0.6548 | 4.33 | 1.13 |
+| **U-KAN** | 0.8797 ± 0.0064 | 0.8049 ± 0.0065 | 10.1306 ± 0.8699 | 5.25 | 9.38 |
 | **TransUnet** | TBD | TBD | TBD | TBD | TBD |
+| **MedT** | 0.8151 ± 0.0053 | 0.7157 ± 0.0071 | 15.5866 ± 0.6548 | 4.33 | 1.13 |
 | **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
 
 
@@ -307,6 +314,7 @@ This method effectively demonstrates the model's stability and generalization pe
 | **UNeXt** | 0.5403 ± 0.0315 | 0.4455 ± 0.0317 | 58.4016 ± 10.0436 | 0.42 | 1.47 |
 | **CMUNet** | 0.5511 ± 0.0295 | 0.4524 ± 0.0327 | 55.6650 ± 13.0657 | 69.81 | 49.93 |
 | **CMUNeXt** | 0.6313 ± 0.0463 | 0.5446 ± 0.0466 | 53.3332 ± 17.7294 | 5.66 | 3.15 |
+| **U-KAN** | 0.6083 ± 0.0410 | 0.5130 ± 0.0542 | 43.6525 ± 9.3918 | 5.25 | 9.38 |
 | **TransUnet** | 0.6715 ± 0.0581 | 0.5806 ± 0.0582 | 35.7003 ± 11.6601 | 75.17 | 179.07 |
 | **MedT** | TBD | TBD | TBD | TBD | TBD |
 | **SwinUnet** | TBD | TBD | TBD | TBD | TBD |
